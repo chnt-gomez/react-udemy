@@ -1,3 +1,5 @@
+import * as z from 'zod/v4';
+
 interface Todo {
     id: number;
     text: string;
@@ -16,13 +18,44 @@ export type TaskAction =
     | { type: 'TOGGLE_TODO', payload: number }
     | { type: 'DELETE_TODO', payload: number }
 
+const TodoSchema = z.object({
+    id: z.number(),
+    text: z.string(),
+    completed: z.boolean()
+});
+
+const TaskStateSchema = z.object({
+    todos: z.array(TodoSchema),
+    length: z.number(),
+    completed: z.number(),
+    pending: z.number()
+})
+
 export const getTasksInitialState = (): TaskState => {
-    return {
-        todos: [],
-        length: 0,
-        completed: 0,
-        pending: 0
+    const localStorageState = localStorage.getItem('tasks-state');
+    console.log(localStorageState);
+
+    if (!localStorageState) {
+        return {
+            todos: [],
+            completed: 0,
+            pending: 0,
+            length: 0
+        };
     }
+
+    const result = TaskStateSchema.safeParse(JSON.parse(localStorageState));
+
+    if (result.error) {
+        console.log(result.error);
+        return {
+            todos: [],
+            completed: 0,
+            pending: 0,
+            length: 0
+        };
+    }
+    return result.data;
 }
 
 
@@ -52,18 +85,20 @@ export const TaskReducer = (state: TaskState, action: TaskAction): TaskState => 
             }
         }
 
-        case ('TOGGLE_TODO'): {
-            const updatedTodos = state.todos.map(t => {
-                if (t.id === action.payload) {
-
-                    return { ...t, completed: !t.completed, }
+        case 'TOGGLE_TODO': {
+            const updatedTodos = state.todos.map((todo) => {
+                if (todo.id === action.payload) {
+                    return { ...todo, completed: !todo.completed };
                 }
-                return t
+                return todo;
             });
-            const completedTodos = state.todos.filter(t => t.completed).length;
+
             return {
-                ...state, todos: updatedTodos, completed: completedTodos, pending: state.length - completedTodos
-            }
+                ...state,
+                todos: updatedTodos,
+                completed: updatedTodos.filter((todo) => todo.completed).length,
+                pending: updatedTodos.filter((todo) => !todo.completed).length,
+            };
         }
         default: return state;
     }
