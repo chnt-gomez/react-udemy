@@ -101,6 +101,7 @@ export const ScrambleWords = () => {
         setErrorCounter(0);
         setCurrentWord(newWords[0]);
         setScrambledWord(scrambleWord(newWords[0]));
+        setIsGameOver(false);
     }
 
 
