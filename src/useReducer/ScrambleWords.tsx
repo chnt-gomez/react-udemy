@@ -14,7 +14,6 @@ import { init, scrambleWordReducer } from './scrambleWordReducer';
 
 export const ScrambleWords = () => {
 
-    // Words no deberia ser un estado
     const [state, dispatch] = useReducer(scrambleWordReducer, init())
 
     const {
@@ -31,6 +30,13 @@ export const ScrambleWords = () => {
         gameLength
 
     } = state;
+
+    useEffect(() => {
+        if (points !== 0) {
+            fireConfetti();
+        }
+        
+    },[points])
 
     const handleGuessSubmit = (e: React.FormEvent) => {
         // Previene el refresh de la página
@@ -53,13 +59,15 @@ export const ScrambleWords = () => {
 
 
     const handleSkip = () => {
-        if (skipCounter == maxSkips) return;
-
-        console.log('Palabra saltada');
+        dispatch({
+            type: 'SKIP_WORD'
+        })
     };
 
     const handlePlayAgain = () => {
-
+        dispatch({
+            type: 'NEW_GAME', payload: init()
+        })
     };
 
     //! Si ya no hay palabras para jugar, se muestra el mensaje de fin de juego
