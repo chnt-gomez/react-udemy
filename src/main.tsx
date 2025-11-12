@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+import { StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Toaster } from 'sonner';
 import './index.css'
@@ -10,12 +10,17 @@ import './index.css'
 //import { MemoHook } from './memos/MemoHook';
 //import { MemoCounter } from './memos/MemoCounter';
 //import { ScrambleWords } from './useReducer/ScrambleWords';
-import { InstagromApp } from './optimistic/InstagromApp';
+//import { InstagromApp } from './optimistic/InstagromApp';
+import { ClientInformation } from './use_suspense/ClientInformation';
+import { getUserAction } from './api/get-user.action';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Toaster richColors/>
-    <InstagromApp />
+    <Suspense fallback={<h1>Cargando...</h1>}>
+      <ClientInformation getUser={ getUserAction(2333) } />
+    </Suspense>
+    
   </StrictMode>,
 );
 
